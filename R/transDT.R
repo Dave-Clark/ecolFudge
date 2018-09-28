@@ -3,6 +3,6 @@ transDT <- function(dt, transCol, rowID){
   newColNames <- dt[, transCol, with = F]
   transposedDt <- transpose(dt[, !colnames(dt) %in% transCol, with = F])
   colnames(transposedDt) <- unlist(newColNames)
-  transposedDt[, rowID] <- newRowNames[newRowNames != transCol]]
+  transposedDt[, rowID] <- newRowNames[newRowNames != transCol]
   return(transposedDt)
 }
