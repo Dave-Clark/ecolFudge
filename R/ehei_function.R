@@ -1,4 +1,4 @@
-ehei <- function(x, taxonomyCol, sampleCols){
+ehei <- function(otuTable, taxonomyCol, sampleCols){
   library(data.table)
   # list of target genera
   hcDegraders <- c("Arthrobacter",
@@ -66,18 +66,19 @@ ehei <- function(x, taxonomyCol, sampleCols){
     "Vibrio")
 
   # coerce x to data.table class
-  setDT(x)
+  otuTable <- as.data.table(otuTable)
 
   # detect row indices of target genera in our OTU table
   hcDegOtus <- grep(paste(hcDegraders, collapse = "|"),
-    as.character(x[[taxonomyCol]]), ignore.case = T)
+    as.character(otuTable[[taxonomyCol]]), ignore.case = T)
 
   # calculate total abundance of all target OTUs in each sample
-  hcDegAbunds <- as.data.table(x[hcDegOtus, colSums(.SD), .SDcols = sampleCols],
+  hcDegAbunds <- as.data.table(otuTable[
+    hcDegOtus, colSums(.SD), .SDcols = sampleCols],
     keep.rownames = T)
 
   # get total library sizes
-  sampSizes <- as.data.table(x[, colSums(.SD), .SDcols = sampleCols],
+  sampSizes <- as.data.table(otuTable[, colSums(.SD), .SDcols = sampleCols],
     keep.rownames = T)
 
   # merge total abundances with total library sizes
