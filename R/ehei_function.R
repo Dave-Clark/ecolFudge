@@ -66,11 +66,11 @@ ehei <- function(otuTable, taxonomyCol, sampleCols){
     "Vibrio")
 
   # coerce x to data.table class
-  otuTable <- as.data.table(otuTable)
+  ifelse(is.data.table(otuTable), otuTable, setDT(otuTable))
 
   # detect row indices of target genera in our OTU table
   hcDegOtus <- grep(paste(hcDegraders, collapse = "|"),
-    as.character(otuTable[, taxonomyCol, with = F]), ignore.case = T)
+    otuTable[, taxonomyCol, with = F], ignore.case = T)
 
   # calculate total abundance of all target OTUs in each sample
   hcDegAbunds <- as.data.table(otuTable[
