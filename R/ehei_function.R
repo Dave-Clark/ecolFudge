@@ -69,8 +69,8 @@ ehei <- function(x, taxonomyCol, sampleCols){
   setDT(x)
 
   # detect row indices of target genera in our OTU table
-  hcDegOtus <- grep(paste(hcDegraders, collapse = "|"), x[[taxonomyCol]],
-    ignore.case = T)
+  hcDegOtus <- grep(paste(hcDegraders, collapse = "|"),
+    as.character(x[[taxonomyCol]]), ignore.case = T)
 
   # calculate total abundance of all target OTUs in each sample
   hcDegAbunds <- as.data.table(x[hcDegOtus, colSums(.SD), .SDcols = sampleCols],
