@@ -1,5 +1,8 @@
 ehei <- function(otuTable, taxonomyCol, sampleCols){
-  library(data.table)
+  # print message telling user how many samples are being used
+  message("Calculating Ecological Hydrocarbon exposure index for ",
+    length(sampleCols), " sample(s)")
+
   # list of target genera
   hcDegraders <- c("Arthrobacter",
     "Dietzia",
@@ -65,34 +68,21 @@ ehei <- function(otuTable, taxonomyCol, sampleCols){
     "Shewanella",
     "Vibrio")
 
-  # coerce x to data.table class
-  ifelse(is.data.table(otuTable), otuTable, setDT(otuTable))
-
   # detect row indices of target genera in our OTU table
   hcDegOtus <- grep(paste(hcDegraders, collapse = "|"),
-    otuTable[, taxonomyCol, with = F], ignore.case = T)
+    as.character(otuTable[, taxonomyCol]), ignore.case = T)
 
   # calculate total abundance of all target OTUs in each sample
-  hcDegAbunds <- as.data.table(otuTable[
-    hcDegOtus, colSums(.SD), .SDcols = sampleCols],
-    keep.rownames = T)
-
-  # get total library sizes
-  sampSizes <- as.data.table(otuTable[, colSums(.SD), .SDcols = sampleCols],
-    keep.rownames = T)
-
-  # merge total abundances with total library sizes
-  hcDegAbunds[sampSizes, librarySize := i.V2, on = c(V1 = "V1")]
-
-  # adjust names of cols
-  names(hcDegAbunds)[1:2] <- c("sample", "hdAbund")
+  hcDegAbunds <- data.frame(sample = sampleCols,
+    hcAbund = colSums(otuTable[hcDegOtus, sampleCols]),
+    librarySize = colSums(otuTable[, sampleCols]))
 
   # calculate total rel abundance of all hc degraders
-  hcDegAbunds[, exposure := hdAbund/librarySize]
+  hcDegAbunds$exposure <- hcDegAbunds$hcAbund/hcDegAbunds$librarySize
 
   # delete unnecessary cols
-  hcDegAbunds[, c("hdAbund", "librarySize") := NULL]
+  hcDegAbunds[, c("hcAbund", "librarySize")] <- NULL
 
-  # return data.table with sample names and exposure indices
+  # return data.frame with sample names and exposure indices
   return(hcDegAbunds)
 }
